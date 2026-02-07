@@ -8,7 +8,8 @@ const { requireRole } = require('../middlewares/role.middleware');
 // Tüm admin endpointleri sadece admin kullanıcıya açık olacak.
 router.use(requireAuth, requireRole('admin'));
 
-// Boş test endpoint
-router.get('/test', adminController.test);
+router.get('/drivers/pending',adminController.getPendingDrivers);
+router.post('/drivers/:id/approve',adminController.approveDriver);
+router.post('/drivers/:id/reject',adminController.rejectDriver);
 
 module.exports = router;

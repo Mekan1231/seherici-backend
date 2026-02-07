@@ -20,6 +20,12 @@ const Car = sequelize.define(
     driver_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
     },
 
     // Araç plakası (benzersiz)
@@ -55,8 +61,8 @@ const Car = sequelize.define(
   },
   {
     tableName: 'cars',
-    timestamps: true,   // created_at & updated_at
-    underscored: true,  // snake_case kolon isimleri
+    timestamps: true,   // createdAt & updatedAt
+    underscored: false,  // camelCase column names
   }
 );
 

@@ -51,7 +51,7 @@ const Trip = sequelize.define(
   {
     tableName: 'trips',
     timestamps: true,
-    underscored: true,
+    underscored: false,
   }
 );
 

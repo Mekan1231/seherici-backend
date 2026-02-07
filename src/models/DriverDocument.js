@@ -11,6 +11,12 @@ const DriverDocument = sequelize.define('DriverDocument', {
   user_id: {
     type: DataTypes.UUID,
     allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
 
   document_type: {
@@ -28,7 +34,13 @@ const DriverDocument = sequelize.define('DriverDocument', {
     defaultValue: 'pending',
     allowNull: false,
   },
-});
+},
+{
+  tableName: 'driver_documents',
+  timestamps: true, // createdAt & updatedAt
+  underscored: false, // camelCase column names
+}
+);
 
 
 
