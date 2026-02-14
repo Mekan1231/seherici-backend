@@ -1,5 +1,5 @@
 const { User, DriverDocument } = require('../models');
-
+const carService = require('../services/car.service');
 // 1 DRIVER APPLY
 const apply = async (req, res) => {
   try {
@@ -62,8 +62,125 @@ const uploadDocument = async (req, res) => {
 };
 
 
+//  3) Araç oluşturma
+const createCar = async (req, res, next) => {
+  try {
+    const driverId = req.user.id;           // JWT'den
+    const data = req.body;                  // plate_number, brand, model, color
+
+    const car = await carService.createCar(driverId, data);
+
+    return res.status(201).json({
+      success: true,
+      message: 'CAR_CREATED',
+      car: {
+        id: car.id,
+        plate_number: car.plate_number,
+        brand: car.brand,
+        model: car.model,
+        color: car.color,
+        is_active: car.is_active,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+//  4) Driver araçlarını listeleme
+const listCars = async (req, res, next) => {
+  try {
+    const driverId = req.user.id;
+
+    const cars = await carService.listCars(driverId);
+
+    return res.json({
+      success: true,
+      message: 'DRIVER_CARS',
+      count: cars.length,
+      cars,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 5) Araç aktif etme
+const activateCar = async (req, res, next) => {
+  try {
+    const driverId = req.user.id;
+    const carId = req.params.id;
+
+    const car = await carService.activateCar(driverId, carId);
+
+    return res.json({
+         success: true,
+      message: 'CAR_ACTIVATED',
+      car: {
+        id: car.id,
+        plate_number: car.plate_number,
+        brand: car.brand,
+        model: car.model,
+        color: car.color,
+        is_active: car.is_active,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 6) Aktif aracı getirme
+async function getActiveCar(req,res, next) {
+  try {
+    const driverId = req.user.id;
+    const car = await carService.getActiveCar(driverId);
+    if (!car) {
+      return res.status(404).json({ success: false, message: 'ACTIVE_CAR_NOT_FOUND' });
+    }
+    return res.json({
+      success: true,
+      message: 'ACTIVE_CAR_FOUND',
+      car: {
+        id: car.id,
+        plate_number: car.plate_number,
+        brand: car.brand,
+        model: car.model,
+        color: car.color,
+        is_active: car.is_active,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// 7) Araç silme (isteğe bağlı)
+async function deleteCar(req, res, next) {
+  try {
+    const driverId = req.user.id;
+    const carId = req.params.carId;
+
+    const result = await carService.deleteCar(driverId, carId);
+
+    return res.json({
+      success: true,
+      message: 'CAR_DELETED',
+      wasActive: result.wasActive,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+    
+
 module.exports = {
   apply,
   uploadDocument, // Yeni endpoint buraya EKLENİYOR (apply silinmiyor)
+  createCar,
+  listCars,
+  activateCar,
+  getActiveCar,
+  deleteCar
 };
 
