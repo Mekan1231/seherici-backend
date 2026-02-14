@@ -15,24 +15,35 @@ const Trip = sequelize.define(
     passenger_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
     },
 
     // Yolculuğu alan sürücü (başta NULL)
     driver_id: {
       type: DataTypes.UUID,
       allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
     },
 
-    // Yolcunun alındığı konum
-    pickup_location: {
-      type: DataTypes.GEOGRAPHY('POINT', 4326),
-      allowNull: false,
-    },
-
-    // Yolculuğun biteceği konum
-    dropoff_location: {
-      type: DataTypes.GEOGRAPHY('POINT', 4326),
-      allowNull: false,
+    car_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'cars',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
     },
 
     // Yolculuğun durumu
@@ -46,6 +57,57 @@ const Trip = sequelize.define(
       ),
       allowNull: false,
       defaultValue: 'requested',
+    },
+
+    // Yolcunun alındığı konum
+    origin: {
+      type: DataTypes.GEOGRAPHY('POINT', 4326),
+      allowNull: false,
+    },
+
+    // Yolculuğun biteceği konum
+    destination: {
+      type: DataTypes.GEOGRAPHY('POINT', 4326),
+      allowNull: false,
+    },
+
+    estimated_fare: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+
+    currency: {
+      type: DataTypes.STRING(3),
+      allowNull: false,
+      defaultValue: 'TMT',
+    },
+
+    finished_by: {
+      type: DataTypes.ENUM('passenger', 'driver', 'admin', 'system', 'none'),
+      allowNull: false,
+      defaultValue: 'none',
+    },
+
+    finish_reason: {
+      type: DataTypes.ENUM(
+        'normal',
+        'passenger_cancel_before_driver',
+        'passenger_cancel_after_accept',
+        'passenger_early_finish',
+        'driver_cancel_before_pickup',
+        'system_cancel_timeout'
+      ),
+      allowNull: true,
+    },
+
+    started_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    finished_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {

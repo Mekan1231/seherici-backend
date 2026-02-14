@@ -4,6 +4,7 @@ const userRoutes = require('./routes/user.routes');
 const authRoutes = require('./routes/auth.routes');
 const driverRoutes = require('./routes/driver.routes');
 const adminRoutes = require('./routes/admin.routes');
+const tripRoutes = require('./routes/trip.routes');
 
 const globalErrorHandler = require('./middlewares/error.middleware');
 
@@ -15,6 +16,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/driver', driverRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/trips', tripRoutes);
 
 // TEST ROOT
 app.get('/', (req, res) => {

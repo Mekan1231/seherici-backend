@@ -1,5 +1,10 @@
 const { User, DriverDocument } = require('../models');
 const carService = require('../services/car.service');
+const tripService = require('../services/trip.service');
+
+
+
+
 // 1 DRIVER APPLY
 const apply = async (req, res) => {
   try {
@@ -172,6 +177,95 @@ async function deleteCar(req, res, next) {
     next(err);
   }
 }
+
+// 8) Trip kabul etme
+async function acceptTrip(req, res, next) {
+  try {
+    const driverId = req.user.id;   // JWT'den
+    const tripId = req.params.id;   // URL'den
+
+    const { trip, activeCar } = await tripService.acceptTrip(driverId, tripId);
+
+    return res.json({
+      success: true,
+      message: 'TRIP_ACCEPTED',
+      trip: {
+        id: trip.id,
+        status: trip.status,
+        passenger_id: trip.passenger_id,
+        driver_id: trip.driver_id,
+        car_id: trip.car_id,
+        estimated_fare: trip.estimated_fare,
+        currency: trip.currency,
+        createdAt: trip.createdAt,
+      },
+      car: {
+        id: activeCar.id,
+        plate_number: activeCar.plate_number,
+        brand: activeCar.brand,
+        model: activeCar.model,
+        color: activeCar.color,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+async function startTrip(req, res, next) {
+  try {
+    const driverId = req.user.id;
+    const tripId = req.params.id;
+
+    const trip = await tripService.startTrip(driverId, tripId);
+
+    return res.json({
+      success: true,
+      message: 'TRIP_STARTED',
+      trip: {
+        id: trip.id,
+        status: trip.status,
+        passenger_id: trip.passenger_id,
+        driver_id: trip.driver_id,
+        car_id: trip.car_id,
+        estimated_fare: trip.estimated_fare,
+        currency: trip.currency,
+        createdAt: trip.createdAt,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function completeTrip(req, res, next) {
+  try {
+    const driverId = req.user.id;
+    const tripId = req.params.id;
+
+    const trip = await tripService.completeTrip(driverId, tripId);
+
+    return res.json({
+      success: true,
+      message: 'TRIP_COMPLETED',
+      trip: {
+        id: trip.id,
+        status: trip.status,
+        passenger_id: trip.passenger_id,
+        driver_id: trip.driver_id,
+        car_id: trip.car_id,
+        estimated_fare: trip.estimated_fare,
+        currency: trip.currency,
+        createdAt: trip.createdAt,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
     
 
 module.exports = {
@@ -181,6 +275,9 @@ module.exports = {
   listCars,
   activateCar,
   getActiveCar,
-  deleteCar
+  deleteCar,
+  acceptTrip,
+  startTrip,
+  completeTrip
 };
 
