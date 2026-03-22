@@ -71,10 +71,6 @@ const Trip = sequelize.define(
       allowNull: false,
     },
 
-    estimated_fare: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
 
     currency: {
       type: DataTypes.STRING(3),
@@ -98,6 +94,31 @@ const Trip = sequelize.define(
         'system_cancel_timeout'
       ),
       allowNull: true,
+    },
+
+    distance_km: {
+      type: DataTypes.DECIMAL(8, 2),
+      allowNull: false,
+    },
+
+    fare_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
+
+    commission_rate: {
+      type: DataTypes.DECIMAL(5, 2), // %5.00 gibi
+      allowNull: false,
+    },
+
+    platform_commission_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
+
+    driver_earning_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
     },
 
     started_at: {

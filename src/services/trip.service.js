@@ -2,6 +2,9 @@
 const { Trip } = require('../models');
 const AppError = require('../utils/AppError');
 const { Car } = require('../models');
+const distanceService = require('../services/distance/distance.service');
+const pricingService = require('../services/pricing/pricing.service');
+
 
 function assertTripNotFinished(trip) {
   if (trip.status === 'completed' || trip.status === 'cancelled') {
@@ -26,7 +29,7 @@ function assertTripNotFinished(trip) {
  * @throws {AppError} Validasyon hatasında
  */
 const createTrip = async (passengerId, data) => {
-  const { origin, destination, estimated_fare, currency } = data;
+  const { origin, destination, currency } = data;
 
   // Origin validasyonu: null/undefined ve valid coordinate kontrol
   if (
@@ -57,6 +60,15 @@ const createTrip = async (passengerId, data) => {
     coordinates: [destination.lng, destination.lat],
   };
 
+  const distanceKm = distanceService.calculate(origin, destination);
+  const pricingConfig = pricingService.getActiveConfig();
+
+  if (!pricingConfig) {
+    throw new AppError('PRICING_CONFIG_NOT_FOUND', 500);
+  }
+  const calculatedFare = pricingService.calculateFare(distanceKm, pricingConfig);
+  
+
   const trip = await Trip.create({
     passenger_id: passengerId,
     driver_id: null,      // henüz driver yok
@@ -65,9 +77,13 @@ const createTrip = async (passengerId, data) => {
 
     origin: originPoint,
     destination: destinationPoint,
-
-    estimated_fare: estimated_fare || null,
+    distance_km: distanceKm,
+    fare_amount: calculatedFare,
     currency: currency || 'TMT',
+    commission_rate: pricingConfig.commission_rate,
+    platform_commission_amount: calculatedFare * (pricingConfig.commission_rate / 100),
+    driver_earning_amount: calculatedFare * (1 - pricingConfig.commission_rate / 100),
+    
   });
 
   return trip;
@@ -182,12 +198,13 @@ const completeTrip = async (driverId, tripId) => {
     throw new AppError('TRIP_NOT_FOUND', 404);
   }
 
-  assertTripNotFinished(trip);
 
   if (trip.driver_id !== driverId) {
     throw new AppError('TRIP_NOT_ASSIGNED_TO_DRIVER', 403);
   }
 
+  assertTripNotFinished(trip);
+  
   if (trip.status !== 'on_the_way') {
     throw new AppError('TRIP_NOT_IN_ON_THE_WAY_STATE', 400);
   }
@@ -219,12 +236,13 @@ const cancelTripByPassenger = async (passengerId, tripId) => {
     throw new AppError('TRIP_NOT_FOUND', 404);
   }
 
-  assertTripNotFinished(trip);
 
   // Bu trip gerçekten bu yolcuya mı ait?
   if (trip.passenger_id !== passengerId) {
     throw new AppError('TRIP_NOT_OWNED_BY_PASSENGER', 403);
   }
+
+  assertTripNotFinished(trip);
 
   // Hangi state'te iptal edebilsin?
   if (trip.status === 'requested') {
