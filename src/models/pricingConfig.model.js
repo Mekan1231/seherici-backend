@@ -21,6 +21,12 @@ const PricingConfig = sequelize.define(
       allowNull: false,
       defaultValue: 0,
     },
+    
+    commission_rate: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+      defaultValue: 10.00,
+}   ,
 
     minimum_fare: {
       type: DataTypes.DECIMAL(10, 2),

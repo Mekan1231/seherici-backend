@@ -1,9 +1,37 @@
 
-const { Trip } = require('../models');
+const { Car, User,Trip } = require('../models');
 const AppError = require('../utils/AppError');
-const { Car } = require('../models');
 const distanceService = require('../services/distance/distance.service');
 const pricingService = require('../services/pricing/pricing.service');
+
+function buildRiderSnapshot(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    phone: user.phone,
+  };
+}
+
+function buildDriverSnapshot(driver, car) {
+  return {
+    id: driver.id,
+    name: driver.name,
+    phone: driver.phone,
+    car: {
+      plate: car?.plate,
+      model: car?.model,
+      color: car?.color,
+    },
+  };
+}
+
+function buildPricingSnapshot(pricing) {
+  return {
+    base_fare: pricing.base_fare,
+    per_km_rate: pricing.per_km_rate,
+    minimum_fare: pricing.minimum_fare,
+  };
+}
 
 
 function assertTripNotFinished(trip) {
@@ -61,13 +89,14 @@ const createTrip = async (passengerId, data) => {
   };
 
   const distanceKm = distanceService.calculate(origin, destination);
-  const pricingConfig = pricingService.getActiveConfig();
+  const pricingConfig = await pricingService.getActiveConfig();
 
   if (!pricingConfig) {
     throw new AppError('PRICING_CONFIG_NOT_FOUND', 500);
   }
   const calculatedFare = pricingService.calculateFare(distanceKm, pricingConfig);
   
+  const passenger = await User.findByPk(passengerId);
 
   const trip = await Trip.create({
     passenger_id: passengerId,
@@ -80,6 +109,8 @@ const createTrip = async (passengerId, data) => {
     distance_km: distanceKm,
     fare_amount: calculatedFare,
     currency: currency || 'TMT',
+    rider_snapshot: buildRiderSnapshot(passenger),
+    pricing_snapshot: buildPricingSnapshot(pricingConfig),
     commission_rate: pricingConfig.commission_rate,
     platform_commission_amount: calculatedFare * (pricingConfig.commission_rate / 100),
     driver_earning_amount: calculatedFare * (1 - pricingConfig.commission_rate / 100),
@@ -132,6 +163,8 @@ const acceptTrip = async (driverId, tripId) => {
   trip.driver_id = driverId;
   trip.car_id = activeCar.id;
   trip.status = 'accepted';
+  const driver = await User.findByPk(driverId);
+  trip.driver_snapshot = buildDriverSnapshot(driver, activeCar);
 
   await trip.save();
 

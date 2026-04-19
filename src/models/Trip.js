@@ -78,6 +78,18 @@ const Trip = sequelize.define(
       defaultValue: 'TMT',
     },
 
+    rider_snapshot: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    driver_snapshot: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    pricing_snapshot: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
     finished_by: {
       type: DataTypes.ENUM('passenger', 'driver', 'admin', 'system', 'none'),
       allowNull: false,

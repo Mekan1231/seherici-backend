@@ -23,7 +23,7 @@ connectDB();
 
 // 7) Sync (dev için; production'da migration önerilir)
 sequelize
-  .sync({ force: false })
+  .sync({ force: false }) 
   .then(() => {
     console.log('Veritabanı tabloları senkronize edildi.');
   })
