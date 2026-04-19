@@ -333,6 +333,30 @@ const finishTripByPassenger = async (passengerId, tripId) => {
   return trip;
 };
 
+const getMyTrips = async (passengerId) => {
+  const trips = await Trip.findAll({
+    where: { passenger_id: passengerId },
+    order: [['createdAt', 'DESC']],
+  });
+  return trips;
+};
+
+const getOpenTrips = async () => {
+  const trips = await Trip.findAll({
+    where: { status: 'requested' },
+    order: [['createdAt', 'ASC']],
+  });
+  return trips;
+};
+
+const getDriverTrips = async (driverId) => {
+  const trips = await Trip.findAll({
+    where: { driver_id: driverId },
+    order: [['createdAt', 'DESC']],
+  });
+  return trips;
+};
+
 
 module.exports = {
   createTrip,
@@ -341,4 +365,7 @@ module.exports = {
   completeTrip,
   cancelTripByPassenger,
   finishTripByPassenger,
+  getMyTrips,
+  getOpenTrips,
+  getDriverTrips,
 };

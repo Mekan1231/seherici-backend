@@ -265,6 +265,35 @@ async function completeTrip(req, res, next) {
   }
 }
 
+async function getOpenTrips(req, res, next) {
+  try {
+    const trips = await tripService.getOpenTrips();
+    return res.json({
+      success: true,
+      message: 'OPEN_TRIPS',
+      count: trips.length,
+      trips,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getDriverTrips(req, res, next) {
+  try {
+    const driverId = req.user.id;
+    const trips = await tripService.getDriverTrips(driverId);
+    return res.json({
+      success: true,
+      message: 'DRIVER_TRIPS',
+      count: trips.length,
+      trips,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 
     
 
@@ -278,6 +307,8 @@ module.exports = {
   deleteCar,
   acceptTrip,
   startTrip,
-  completeTrip
+  completeTrip,
+  getOpenTrips,
+  getDriverTrips,
 };
 

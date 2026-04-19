@@ -18,6 +18,11 @@ router.post('/trips/:id/accept',requireAuth,requireRole('driver'),driverControll
 router.post('/trips/:id/start', requireAuth, requireRole('driver'), driverController.startTrip);
 router.post('/trips/:id/complete', requireAuth, requireRole('driver'), driverController.completeTrip);
 
+// Driver açık trip'leri görür
+router.get('/trips/open', requireAuth, requireRole('driver'), driverController.getOpenTrips);
+
+// Driver kendi trip'lerini görür
+router.get('/trips/my', requireAuth, requireRole('driver'), driverController.getDriverTrips);
 
 
 module.exports = router;

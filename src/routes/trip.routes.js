@@ -24,4 +24,7 @@ router.post(
   tripController.finishAsPassenger
 );
 
+// Passenger kendi trip'lerini görür
+router.get('/my', requireAuth, requireRole('passenger'), tripController.getMyTrips);
+
 module.exports = router;

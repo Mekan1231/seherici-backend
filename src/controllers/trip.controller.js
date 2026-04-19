@@ -80,8 +80,56 @@ const finishAsPassenger = async (req, res, next) => {
   }
 };
 
+const getMyTrips = async (req, res, next) => {
+  try {
+    const passengerId = req.user.id;
+    const trips = await tripService.getMyTrips(passengerId);
+    return res.json({
+      success: true,
+      message: 'MY_TRIPS',
+      count: trips.length,
+      trips,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getOpenTrips = async (req, res, next) => {
+  try {
+    const trips = await tripService.getOpenTrips();
+    return res.json({
+      success: true,
+      message: 'OPEN_TRIPS',
+      count: trips.length,
+      trips,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getDriverTrips = async (req, res, next) => {
+  try {
+    const driverId = req.user.id;
+    const trips = await tripService.getDriverTrips(driverId);
+    return res.json({
+      success: true,
+      message: 'DRIVER_TRIPS',
+      count: trips.length,
+      trips,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createTrip,
   cancelAsPassenger,
   finishAsPassenger,
+  getMyTrips,
+  getOpenTrips,
+  getDriverTrips,
 };
+
