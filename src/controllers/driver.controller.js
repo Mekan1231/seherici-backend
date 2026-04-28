@@ -294,6 +294,31 @@ async function getDriverTrips(req, res, next) {
   }
 }
 
+async function cancelTrip(req, res, next) {
+  try {
+    const driverId = req.user.id;
+    const tripId = req.params.id;
+
+    const trip = await tripService.cancelTripByDriver(driverId, tripId);
+
+    return res.json({
+      success: true,
+      message: 'TRIP_CANCELLED_BY_DRIVER',
+      trip: {
+        id: trip.id,
+        status: trip.status,
+        driver_id: trip.driver_id,
+        passenger_id: trip.passenger_id,
+        finished_by: trip.finished_by,
+        finish_reason: trip.finish_reason,
+        finished_at: trip.finished_at,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 
     
 
@@ -310,5 +335,5 @@ module.exports = {
   completeTrip,
   getOpenTrips,
   getDriverTrips,
+  cancelTrip,
 };
-

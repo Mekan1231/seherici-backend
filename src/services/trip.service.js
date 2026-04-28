@@ -357,10 +357,43 @@ const getDriverTrips = async (driverId) => {
   return trips;
 };
 
+const cancelTripByDriver = async (driverId, tripId) => {
+  if (!tripId) {
+    throw new AppError('TRIP_ID_REQUIRED', 400);
+  }
+
+  const trip = await Trip.findByPk(tripId);
+  if (!trip) {
+    throw new AppError('TRIP_NOT_FOUND', 404);
+  }
+
+  // Bu trip bu driver'a mı ait?
+  if (trip.driver_id !== driverId) {
+    throw new AppError('TRIP_NOT_ASSIGNED_TO_DRIVER', 403);
+  }
+
+  assertTripNotFinished(trip);
+
+  // Sadece accepted durumunda iptal edebilir
+  if (trip.status !== 'accepted') {
+    throw new AppError('DRIVER_CAN_ONLY_CANCEL_ACCEPTED_TRIP', 400);
+  }
+
+  trip.status = 'cancelled';
+  trip.finished_by = 'driver';
+  trip.finish_reason = 'driver_cancel_before_pickup';
+  trip.finished_at = new Date();
+
+  await trip.save();
+  return trip;
+};
+
 
 module.exports = {
   createTrip,
   acceptTrip,
+  cancelTripByDriver,
+
   startTrip,
   completeTrip,
   cancelTripByPassenger,

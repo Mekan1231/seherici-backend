@@ -17,6 +17,7 @@ router.get('/active-car', requireAuth, requireRole('driver'), driverController.g
 router.post('/trips/:id/accept',requireAuth,requireRole('driver'),driverController.acceptTrip);
 router.post('/trips/:id/start', requireAuth, requireRole('driver'), driverController.startTrip);
 router.post('/trips/:id/complete', requireAuth, requireRole('driver'), driverController.completeTrip);
+router.post('/trips/:id/cancel', requireAuth, requireRole('driver'), driverController.cancelTrip);
 
 // Driver açık trip'leri görür
 router.get('/trips/open', requireAuth, requireRole('driver'), driverController.getOpenTrips);
