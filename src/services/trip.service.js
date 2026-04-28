@@ -88,6 +88,18 @@ const createTrip = async (passengerId, data) => {
     coordinates: [destination.lng, destination.lat],
   };
 
+  // Yolcunun aktif trip'i var mı?
+  const activeTrip = await Trip.findOne({
+  where: {
+    passenger_id: passengerId,
+    status: ['requested', 'accepted', 'on_the_way'],
+    },
+  });
+
+  if (activeTrip) {
+    throw new AppError('PASSENGER_HAS_ACTIVE_TRIP', 400);
+  }
+
   const distanceKm = distanceService.calculate(origin, destination);
   const pricingConfig = await pricingService.getActiveConfig();
 
@@ -388,12 +400,25 @@ const cancelTripByDriver = async (driverId, tripId) => {
   return trip;
 };
 
+const getTripById = async (tripId, userId) => {
+  const trip = await Trip.findByPk(tripId);
+
+  if (!trip) {
+    throw new AppError('TRIP_NOT_FOUND', 404);
+  }
+
+  if (trip.passenger_id !== userId && trip.driver_id !== userId) {
+    throw new AppError('TRIP_ACCESS_DENIED', 403);
+  }
+
+  return trip;
+};
+
 
 module.exports = {
   createTrip,
   acceptTrip,
   cancelTripByDriver,
-
   startTrip,
   completeTrip,
   cancelTripByPassenger,
@@ -401,4 +426,5 @@ module.exports = {
   getMyTrips,
   getOpenTrips,
   getDriverTrips,
+  getTripById,
 };
