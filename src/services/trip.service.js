@@ -1,5 +1,6 @@
 
 const { Car, User,Trip } = require('../models');
+const { Op } = require('sequelize');
 const AppError = require('../utils/AppError');
 const distanceService = require('../services/distance/distance.service');
 const pricingService = require('../services/pricing/pricing.service');
@@ -353,11 +354,18 @@ const getMyTrips = async (passengerId) => {
   return trips;
 };
 
-const getOpenTrips = async () => {
+const getOpenTrips = async (since = null) => {
+  const where = { status: 'requested' };
+
+  if (since) {
+    where.createdAt = { [Op.gt]: new Date(since) };
+  }
+
   const trips = await Trip.findAll({
-    where: { status: 'requested' },
+    where,
     order: [['createdAt', 'ASC']],
   });
+
   return trips;
 };
 

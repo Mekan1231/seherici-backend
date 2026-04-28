@@ -267,7 +267,8 @@ async function completeTrip(req, res, next) {
 
 async function getOpenTrips(req, res, next) {
   try {
-    const trips = await tripService.getOpenTrips();
+    const since = req.query.since || null;
+    const trips = await tripService.getOpenTrips(since);
     return res.json({
       success: true,
       message: 'OPEN_TRIPS',
