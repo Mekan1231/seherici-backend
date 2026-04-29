@@ -56,9 +56,31 @@ const me = async (req, res, next) => {
   }
 };
 
+const switchMode = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const user = await userService.switchMode(userId);
+
+    return res.json({
+      success: true,
+      message: 'MODE_SWITCHED',
+      user: {
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        driver_status: user.driver_status,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createUser,
   me,
+  switchMode,
 };
 
 

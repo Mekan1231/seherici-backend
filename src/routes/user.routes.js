@@ -19,6 +19,8 @@ router.get('/driver-panel', requireAuth, requireRole('driver'), (req, res) => {
   });
 });
 
+router.patch('/switch-mode', requireAuth, userController.switchMode);
+
 module.exports = router;
 
 
