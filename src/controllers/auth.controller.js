@@ -1,11 +1,8 @@
 const authService = require('../services/auth.service');
-
 const login = async (req, res, next) => {
   try {
     const { phone, password } = req.body;
-
     const result = await authService.login(phone, password);
-
     return res.status(200).json({
       success: true,
       message: "LOGIN_SUCCESS",
@@ -15,18 +12,12 @@ const login = async (req, res, next) => {
         name: result.user.name,
         phone: result.user.phone,
         role: result.user.role,
+        driver_status: result.user.driver_status,
         is_available: result.user.is_available
       }
     });
-
   } catch (err) {
-    next(err); // ⬅ Hata global error handler’a gider
+    next(err);
   }
 };
-
 module.exports = { login };
-
-
-
-
-

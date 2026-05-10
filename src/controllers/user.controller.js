@@ -59,11 +59,11 @@ const me = async (req, res, next) => {
 const switchMode = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const user = await userService.switchMode(userId);
-
+    const { user, token } = await userService.switchMode(userId);
     return res.json({
       success: true,
       message: 'MODE_SWITCHED',
+      token,
       user: {
         id: user.id,
         name: user.name,
