@@ -38,7 +38,7 @@ const switchMode = async (userId) => {
   }
   if (user.role === 'passenger') {
     if (user.driver_status !== 'approved') {
-      throw new AppError('DRIVER_NOT_APPROVED', 403);
+      throw new AppError('DRIVER_NOT_APPROVED', 403, 'DRIVER_NOT_APPROVED');
     }
     // Aktif trip var mı?
     const { Trip } = require('../models');
@@ -49,13 +49,13 @@ const switchMode = async (userId) => {
       },
     });
     if (activeTrip) {
-      throw new AppError('CANNOT_SWITCH_WITH_ACTIVE_TRIP', 400);
+      throw new AppError('CANNOT_SWITCH_WITH_ACTIVE_TRIP', 400, 'CANNOT_SWITCH_WITH_ACTIVE_TRIP');
     }
     user.role = 'driver';
   } else if (user.role === 'driver') {
     user.role = 'passenger';
   } else {
-    throw new AppError('ADMIN_CANNOT_SWITCH', 400);
+    throw new AppError('ADMIN_CANNOT_SWITCH', 400, 'ADMIN_CANNOT_SWITCH');
   }
   await user.save();
 
