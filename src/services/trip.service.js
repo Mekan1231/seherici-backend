@@ -422,6 +422,24 @@ const getTripById = async (tripId, userId) => {
   return trip;
 };
 
+const getDriverLocation = async (tripId, passengerId) => {
+  const trip = await Trip.findByPk(tripId);
+  if (!trip) throw new AppError('TRIP_NOT_FOUND', 404);
+  if (trip.passenger_id !== passengerId) throw new AppError('TRIP_ACCESS_DENIED', 403);
+  if (!trip.driver_id) throw new AppError('NO_DRIVER_ASSIGNED', 400);
+
+  const { User } = require('../models');
+  const driver = await User.findByPk(trip.driver_id, {
+    attributes: ['id', 'name', 'current_location'],
+  });
+
+  if (!driver?.current_location) throw new AppError('DRIVER_LOCATION_NOT_AVAILABLE', 404);
+
+  return {
+    lat: driver.current_location.coordinates[1],
+    lng: driver.current_location.coordinates[0],
+  };
+};
 
 module.exports = {
   createTrip,
@@ -434,5 +452,7 @@ module.exports = {
   getMyTrips,
   getOpenTrips,
   getDriverTrips,
+  getDriverLocation,
   getTripById,
 };
+

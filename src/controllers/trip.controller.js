@@ -141,6 +141,20 @@ const getTripById = async (req, res, next) => {
   }
 };
 
+const getDriverLocation = async (req, res, next) => {
+  try {
+    const passengerId = req.user.id;
+    const tripId = req.params.id;
+    const location = await tripService.getDriverLocation(tripId, passengerId);
+    return res.json({
+      success: true,
+      location,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createTrip,
   cancelAsPassenger,
@@ -149,5 +163,8 @@ module.exports = {
   getOpenTrips,
   getDriverTrips,
   getTripById,
+  getDriverLocation,
 };
+
+
 

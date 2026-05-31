@@ -1,43 +1,18 @@
 const { User } = require('../models');
+const AppError = require('../utils/AppError');
 
 const applyForDriver = async (userId) => {
   const user = await User.findByPk(userId);
-
-  if (!user) {
-    const err = new Error('USER_NOT_FOUND');
-    err.code = 'USER_NOT_FOUND';
-    throw err;
-  }
-
-  // Zaten driver ise — başvuru yapamaz
-  if (user.role === 'driver') {
-    const err = new Error('ALREADY_DRIVER');
-    err.code = 'ALREADY_DRIVER';
-    throw err;
-  }
-
-  // Zaten başvuru yapmışsa
-  if (user.driver_status === 'pending') {
-    const err = new Error('ALREADY_PENDING');
-    err.code = 'ALREADY_PENDING';
-    throw err;
-  }
-
-  // Reddedilmiş ise — tekrar başvurmasına izin verebilirsin veya engelleyebilirsin
-  // Biz yeniden başvuruya izin veriyoruz
-  if (user.driver_status === 'rejected') {
-    // devam edeceğiz
-  }
-
-  // Başvuru kaydı
+  if (!user) throw new AppError('USER_NOT_FOUND', 404, 'USER_NOT_FOUND');
+  if (user.role === 'driver') throw new AppError('ALREADY_DRIVER', 400, 'ALREADY_DRIVER');
+  if (user.driver_status === 'pending') throw new AppError('ALREADY_PENDING', 400, 'ALREADY_PENDING');
   user.driver_status = 'pending';
   await user.save();
-
   return user;
 };
 
 const uploadDriverDocument = async (userId, document_type, fileUrl) => {
-  // Yeni belge kaydı
+  const { DriverDocument } = require('../models');
   return await DriverDocument.create({
     user_id: userId,
     document_type,
@@ -46,7 +21,19 @@ const uploadDriverDocument = async (userId, document_type, fileUrl) => {
   });
 };
 
+const updateLocation = async (driverId, lat, lng) => {
+  const driver = await User.findByPk(driverId);
+  if (!driver) throw new AppError('USER_NOT_FOUND', 404, 'USER_NOT_FOUND');
+  driver.current_location = {
+    type: 'Point',
+    coordinates: [lng, lat],
+  };
+  await driver.save();
+  return { lat, lng };
+};
+
 module.exports = {
   applyForDriver,
   uploadDriverDocument,
+  updateLocation,
 };

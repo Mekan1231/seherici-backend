@@ -28,5 +28,6 @@ router.post(
 router.get('/my', requireAuth, requireRole('passenger'), tripController.getMyTrips);
 
 router.get('/:id', requireAuth, tripController.getTripById);
+router.get('/:id/driver-location', requireAuth, requireRole('passenger'), tripController.getDriverLocation);
 
 module.exports = router;

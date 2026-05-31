@@ -26,4 +26,5 @@ router.get('/trips/open', requireAuth, requireRole('driver'), driverController.g
 router.get('/trips/my', requireAuth, requireRole('driver'), driverController.getDriverTrips);
 
 
+router.patch('/location', requireAuth, requireRole('driver'), driverController.updateLocation);
 module.exports = router;

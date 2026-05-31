@@ -119,7 +119,7 @@ const activateCar = async (req, res, next) => {
     const car = await carService.activateCar(driverId, carId);
 
     return res.json({
-         success: true,
+      success: true,
       message: 'CAR_ACTIVATED',
       car: {
         id: car.id,
@@ -136,7 +136,7 @@ const activateCar = async (req, res, next) => {
 };
 
 // 6) Aktif aracı getirme
-async function getActiveCar(req,res, next) {
+async function getActiveCar(req, res, next) {
   try {
     const driverId = req.user.id;
     const car = await carService.getActiveCar(driverId);
@@ -321,7 +321,29 @@ async function cancelTrip(req, res, next) {
 }
 
 
-    
+
+// Konum güncelleme
+async function updateLocation(req, res, next) {
+  try {
+    const driverId = req.user.id;
+    const { lat, lng } = req.body;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ success: false, message: 'LAT_LNG_REQUIRED' });
+    }
+
+    const driverService = require('../services/driver.service');
+    const result = await driverService.updateLocation(driverId, lat, lng);
+
+    return res.json({
+      success: true,
+      message: 'LOCATION_UPDATED',
+      location: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
 module.exports = {
   apply,
@@ -337,4 +359,5 @@ module.exports = {
   getOpenTrips,
   getDriverTrips,
   cancelTrip,
+  updateLocation,
 };
