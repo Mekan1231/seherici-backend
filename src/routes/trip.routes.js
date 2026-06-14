@@ -25,6 +25,7 @@ router.post(
 );
 
 // Passenger kendi trip'lerini görür
+router.get('/nearby-drivers', requireAuth, tripController.getNearbyDrivers);
 router.get('/my', requireAuth, requireRole('passenger'), tripController.getMyTrips);
 
 router.get('/:id', requireAuth, tripController.getTripById);

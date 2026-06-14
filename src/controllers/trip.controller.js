@@ -155,16 +155,46 @@ const getDriverLocation = async (req, res, next) => {
   }
 };
 
+const getNearbyDrivers = async (req, res, next) => {
+  try {
+    const { lat, lng, radius } = req.query;
+
+    if (!lat || !lng) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'LAT_LNG_REQUIRED', message: 'Konum gerekli' }
+      });
+    }
+
+    const drivers = await tripService.getNearbyDrivers(
+      parseFloat(lat),
+      parseFloat(lng),
+      radius ? parseFloat(radius) : 5
+    );
+
+    return res.json({
+      success: true,
+      count: drivers.length,
+      drivers,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 module.exports = {
   createTrip,
   cancelAsPassenger,
   finishAsPassenger,
+  getNearbyDrivers,
   getMyTrips,
   getOpenTrips,
   getDriverTrips,
   getTripById,
   getDriverLocation,
 };
+
 
 
 

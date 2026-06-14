@@ -345,6 +345,27 @@ async function updateLocation(req, res, next) {
   }
 }
 
+// Sürücü müsaitlik durumunu günceller
+// isAvailable: true → sürücü müsait (yeni trip alabilir)
+// isAvailable: false → sürücü meşgul (trip alamaz)
+async function setAvailability(req, res, next) {
+  try {
+    const driverId = req.user.id;
+    const { is_available } = req.body;
+
+    const driverService = require('../services/driver.service');
+    const result = await driverService.setAvailability(driverId, is_available);
+
+    return res.json({
+      success: true,
+      message: is_available ? 'DRIVER_AVAILABLE' : 'DRIVER_UNAVAILABLE',
+      is_available: result.is_available,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   apply,
   uploadDocument, // Yeni endpoint buraya EKLENİYOR (apply silinmiyor)
@@ -360,4 +381,6 @@ module.exports = {
   getDriverTrips,
   cancelTrip,
   updateLocation,
+  setAvailability
 };
+

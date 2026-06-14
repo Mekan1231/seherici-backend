@@ -32,8 +32,22 @@ const updateLocation = async (driverId, lat, lng) => {
   return { lat, lng };
 };
 
+
+const setAvailability = async (driverId, isAvailable) => {
+  const driver = await User.findByPk(driverId);
+  if (!driver) throw new AppError('USER_NOT_FOUND', 404, 'USER_NOT_FOUND');
+  driver.is_available = isAvailable;
+  await driver.save();
+  return { is_available: isAvailable };
+};
+
+
 module.exports = {
   applyForDriver,
   uploadDriverDocument,
   updateLocation,
+  setAvailability,
 };
+
+
+

@@ -1,5 +1,5 @@
 
-const { Car, User,Trip } = require('../models');
+const { Car, User, Trip } = require('../models');
 const { Op } = require('sequelize');
 const AppError = require('../utils/AppError');
 const distanceService = require('../services/distance/distance.service');
@@ -91,9 +91,9 @@ const createTrip = async (passengerId, data) => {
 
   // Yolcunun aktif trip'i var mı?
   const activeTrip = await Trip.findOne({
-  where: {
-    passenger_id: passengerId,
-    status: ['requested', 'accepted', 'on_the_way'],
+    where: {
+      passenger_id: passengerId,
+      status: ['requested', 'accepted', 'on_the_way'],
     },
   });
 
@@ -108,7 +108,7 @@ const createTrip = async (passengerId, data) => {
     throw new AppError('PRICING_CONFIG_NOT_FOUND', 500);
   }
   const calculatedFare = pricingService.calculateFare(distanceKm, pricingConfig);
-  
+
   const passenger = await User.findByPk(passengerId);
 
   const trip = await Trip.create({
@@ -127,7 +127,7 @@ const createTrip = async (passengerId, data) => {
     commission_rate: pricingConfig.commission_rate,
     platform_commission_amount: calculatedFare * (pricingConfig.commission_rate / 100),
     driver_earning_amount: calculatedFare * (1 - pricingConfig.commission_rate / 100),
-    
+
   });
 
   return trip;
@@ -250,13 +250,13 @@ const completeTrip = async (driverId, tripId) => {
   }
 
   assertTripNotFinished(trip);
-  
+
   if (trip.status !== 'on_the_way') {
     throw new AppError('TRIP_NOT_IN_ON_THE_WAY_STATE', 400);
   }
 
   trip.status = 'completed';
-  trip.finished_by = 'driver';  
+  trip.finished_by = 'driver';
   trip.finish_reason = 'normal';
   trip.finished_at = new Date();
 
@@ -441,6 +441,41 @@ const getDriverLocation = async (tripId, passengerId) => {
   };
 };
 
+const getNearbyDrivers = async (lat, lng, radiusKm = 5) => {
+  const { sequelize } = require('../config/db');
+  const { Op } = require('sequelize');
+  const { User } = require('../models');
+
+  const drivers = await User.findAll({
+    where: {
+      role: 'driver',
+      is_available: true,
+    },
+    attributes: ['id', 'name', 'current_location', 'rating'],
+  });
+
+  // Haversine ile mesafe filtrele
+  const nearby = drivers.filter(driver => {
+    if (!driver.current_location) return false;
+    const dLat = (driver.current_location.coordinates[1] - lat) * Math.PI / 180;
+    const dLng = (driver.current_location.coordinates[0] - lng) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat * Math.PI / 180) * Math.cos(driver.current_location.coordinates[1] * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = 6371 * c;
+    return distance <= radiusKm;
+  });
+
+  return nearby.map(d => ({
+    id: d.id,
+    name: d.name,
+    rating: d.rating,
+    lat: d.current_location.coordinates[1],
+    lng: d.current_location.coordinates[0],
+  }));
+};
+
 module.exports = {
   createTrip,
   acceptTrip,
@@ -454,5 +489,6 @@ module.exports = {
   getDriverTrips,
   getDriverLocation,
   getTripById,
+  getNearbyDrivers
 };
 
